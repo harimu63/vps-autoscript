@@ -31,7 +31,7 @@ install_acme() {
   tmpscript=$(mktemp /tmp/acme_install.XXXXXXXX.sh)
   register_cleanup "rm -f ${tmpscript}"
   safe_download "${ACME_INSTALL_URL}" "${tmpscript}"
-  bash "${tmpscript}" --install-online -m "$(get_config ADMIN_EMAIL "admin@$(get_domain)")"
+  bash "${tmpscript}"
   success "acme.sh installed."
 }
 

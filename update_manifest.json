@@ -1,0 +1,28 @@
+{
+  "version": "3.1.0",
+  "timestamp": "2026-11-13T09:00:17+07:00",
+  "files": [
+    {"path": "library/common.sh", "sha256": "8ac70169d1365bdcc2f8d277556020a2b8d4d4378d97383f6a39f5aa6ad138a0"},
+    {"path": "library/logger.sh", "sha256": "e7f77414043f99f0563a950e3795251ea5625a8beb3612e44447d2dfdae26551"},
+    {"path": "library/validation.sh", "sha256": "a1e0e9cac2cbe9e256cf1a50f979bc148a8482034fa8a86441fcaff4c64a7ba1"},
+    {"path": "library/service_manager.sh", "sha256": "834c9027cafd5aada2fadc54378efcef861b06eb660f2fecbbaca3d9241904ab"},
+    {"path": "library/dependency_manager.sh", "sha256": "87be28a6377cb35a10fd5f824304215a1f0dd0ff05cf93b9358791d3dd06c7f3"},
+    {"path": "library/firewall_manager.sh", "sha256": "e2caf201f00a0af5bab61203f6e7d206a587e2e06fc63383494d1c94da4b226e"},
+    {"path": "update/updater.sh", "sha256": "472352517f80d29ca451ea470ff38df7bd9aa595756234076f2070a0919fcfc4"},
+    {"path": "menu/main.sh", "sha256": "076bf22952bfdb73670a85f5c21d722566f152def50d26d610b4c20bcea26a75"},
+    {"path": "service/ssh_user.sh", "sha256": "5c00b24968be0b05e19f4a721d511eca1c9786ad3543e13df557943e0c6ce457"},
+    {"path": "service/xray_user.sh", "sha256": "3ae3f7c796337609755861e7bf6fa7fc33200e836b2369f63e4ba1f374d51e89"},
+    {"path": "installer/main.sh", "sha256": "593a898c852ec4b06e11abdaf7918f158eaad95a02bcbd6b323109937d81af69"},
+    {"path": "installer/xray.sh", "sha256": "b75aba91d5ebd9c88cf61a450443324e57cfc300b1ca1c9476d50a05b3860cde"},
+    {"path": "installer/nginx.sh", "sha256": "3b38885fa7c8beb512d9fc2006b4a634dc78b53db5aabe6acb38bb2e47eab55c"},
+    {"path": "installer/ssh_setup.sh", "sha256": "c83a6d03d9447ef98ecfd2d7ec3721800031b9f90449dc8230b0e31e1d680650"},
+    {"path": "installer/ssl.sh", "sha256": "6b21b591aea2aa041a473d37e88fd5589132a132ef3e6442b24ad860cc27a88a"},
+    {"path": "installer/openvpn.sh", "sha256": "8f9b01112174d0d48bef4b59245893aa15ba31fd3c005ff8a948b58d122273e7"},
+    {"path": "backup/backup.sh", "sha256": "c5e945ae3eef629390aa651c82c55eb0946b45be38707e6f8d18fa34cb933e52"},
+    {"path": "backup/restore.sh", "sha256": "024c7809e3548f85027253ec1767ada22d2cab9992c263c3b068d4b35ab04b31"},
+    {"path": "monitoring/status.sh", "sha256": "efec6fb41dc7c9388fb063869a6ea64a63f8d5defe25cbbf98af620f33648be4"},
+    {"path": "monitoring/health_check.sh", "sha256": "2a8eedfc030a7c669962a43a04b8d1ab3fe35850493e072aa3857fe08bf14827"},
+    {"path": "utils/port_manager.sh", "sha256": "3656ed9634350213b39a362afe832628def23fdc148f2a0772b67f206faaf993"},
+    {"path": "utils/cert_manager.sh", "sha256": "1a61e542a8440a961a85b1e05c5e103e5ced6c41ff66aeac9ea2bf80b1061043"}
+  ]
+}
