@@ -4,6 +4,10 @@
 # Part of vps-autoscript clean architecture
 # =============================================================================
 
+# Guard against double-source
+[[ -n "${_COMMON_SH:-}" ]] && return 0
+readonly _COMMON_SH=1
+
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
