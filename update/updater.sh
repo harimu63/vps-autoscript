@@ -128,25 +128,92 @@ for f in manifest.get('files', []):
 
   # Install downloaded files
   step "Installing update files..."
+  local updated_files=()
   while IFS='|' read -r rel_path _; do
     [[ -z "${rel_path}" ]] && continue
     local src="${UPDATE_TMP_DIR}/${rel_path}"
     local dst="${LIB_DIR}/${rel_path}"
     ensure_dir "$(dirname "${dst}")"
     cp "${src}" "${dst}"
-    chmod +x "${dst}"
+    # Ensure executable permission for shell scripts
+    if [[ "${rel_path}" == *.sh ]]; then
+      chmod +x "${dst}"
+    fi
+    updated_files+=("${rel_path}")
   done <<< "${files_json}"
+
+  # Ensure updater.sh is executable for any subsequent runs
+  chmod +x "${LIB_DIR}/update/updater.sh"
 
   # Update version
   echo "${remote_ver}" > "${VERSION_FILE}"
   success "Updated to v${remote_ver}."
 
-  # Reload services if needed
-  systemctl daemon-reload
-  safe_restart_xray 2>/dev/null || true
-  safe_restart_nginx 2>/dev/null || true
+  # Reload systemd daemon
+  systemctl daemon-reload 2>/dev/null || true
+
+  # Restart Xray with config validation
+  step "Restarting Xray..."
+  if safe_restart_xray 2>/dev/null; then
+    success "Xray restarted successfully."
+  else
+    warn "Xray restart failed. Checking configuration..."
+    if [[ -f "${XRAY_CONF:-/etc/xray/config.json}" ]]; then
+      python3 -c "import json, sys; json.load(open(sys.argv[1]))" "${XRAY_CONF}" 2>/dev/null || {
+        error "Xray config JSON is invalid. Manual intervention required."
+        error "Check: ${XRAY_CONF}"
+      }
+    fi
+    return 1
+  fi
+
+  # Restart Nginx with config validation
+  step "Restarting Nginx..."
+  if safe_restart_nginx 2>/dev/null; then
+    success "Nginx restarted successfully."
+  else
+    error "Nginx restart failed. Configuration may be invalid."
+    return 1
+  fi
+
+  # Restart all other managed services
+  step "Restarting other services..."
+  for svc in ssh dropbear stunnel4 trojan-go openvpn; do
+    systemctl is-enabled --quiet "${svc}" 2>/dev/null || continue
+    if systemctl is-active --quiet "${svc}" 2>/dev/null; then
+      svc_restart "${svc}" 2>/dev/null || true
+    fi
+  done
+  success "All services restarted."
+
+  # Run post-update health check
+  step "Running post-update health check..."
+  local failed_services=()
+  for svc in nginx xray ssh dropbear; do
+    if ! svc_is_active "${svc}" 2>/dev/null; then
+      failed_services+=("${svc}")
+    fi
+  done
+
+  if [[ ${#failed_services[@]} -gt 0 ]]; then
+    warn "The following services are not active: ${failed_services[*]}"
+    warn "Please run: autoscript-health-check"
+  else
+    success "All critical services are running."
+  fi
 
   log_audit "update" "from=${local_ver} to=${remote_ver}"
+
+  # Check if updater.sh itself was updated and re-execute if needed
+  local updater_checksum_old updater_checksum_new
+  updater_checksum_old=$(sha256sum "${LIB_DIR}/update/updater.sh" 2>/dev/null | awk '{print $1}' || echo "")
+  updater_checksum_new=$(sha256sum "${UPDATE_TMP_DIR}/update/updater.sh" 2>/dev/null | awk '{print $1}' || echo "")
+  
+  if [[ "${updater_checksum_old}" != "${updater_checksum_new}" ]]; then
+    success "Updater.sh was updated. Reloading..."
+    exec bash "${LIB_DIR}/update/updater.sh" run
+  fi
+
   success "Update complete: v${local_ver} → v${remote_ver}"
   release_lock
 }
