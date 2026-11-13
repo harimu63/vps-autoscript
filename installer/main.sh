@@ -12,6 +12,7 @@ source "${LIB_DIR_LOCAL}/logger.sh"
 source "${LIB_DIR_LOCAL}/validation.sh"
 source "${LIB_DIR_LOCAL}/service_manager.sh"
 source "${LIB_DIR_LOCAL}/dependency_manager.sh"
+source "${LIB_DIR_LOCAL}/firewall_manager.sh"
 
 INSTALLER_DIR="$(dirname "${BASH_SOURCE[0]}")"
 INSTALLER_START_TIME=${SECONDS}
@@ -51,8 +52,9 @@ collect_params() {
   # Domain
   echo -e "  ${DIM}Enter the domain/subdomain pointing to this server's IP.${RESET}"
   echo -e "  ${DIM}Example: vpn.myserver.com${RESET}"
+  echo -e "  ${YELLOW}IMPORTANT: Domain MUST be pointed to this VPS IP for SSL certificate!${RESET}"
   echo ""
-  prompt_domain "Domain or IP" INSTALL_DOMAIN
+  prompt_domain "Domain" INSTALL_DOMAIN
 
   # Admin email (for SSL cert notifications)
   echo ""
@@ -86,7 +88,7 @@ collect_params() {
 # -----------------------------------------------------------------------------
 
 phase_system_prep() {
-  step "[Phase 1/7] System Preparation"
+  step "[Phase 1/8] System Preparation"
 
   source "${INSTALLER_DIR}/system_check.sh"
   run_preflight
@@ -112,10 +114,11 @@ phase_system_prep() {
 # -----------------------------------------------------------------------------
 
 phase_dependencies() {
-  step "[Phase 2/7] Installing Dependencies"
+  step "[Phase 2/8] Installing Dependencies"
   install_core_deps
   install_vpn_deps
   install_nodejs
+  install_ufw
   register_rollback "echo 'Rollback: packages remain (apt-get autoremove to clean if desired)'"
   success "Phase 2 complete."
 }
@@ -125,7 +128,7 @@ phase_dependencies() {
 # -----------------------------------------------------------------------------
 
 phase_ssl() {
-  step "[Phase 3/7] SSL Certificate"
+  step "[Phase 3/8] SSL Certificate"
   source "${INSTALLER_DIR}/ssl.sh"
   install_acme
   set_default_ca
@@ -146,7 +149,7 @@ phase_ssl() {
 # -----------------------------------------------------------------------------
 
 phase_xray() {
-  step "[Phase 4/7] Xray + Trojan-Go"
+  step "[Phase 4/8] Xray + Trojan-Go"
   source "${INSTALLER_DIR}/xray.sh"
   setup_xray_dirs
   install_xray_core
@@ -164,7 +167,7 @@ phase_xray() {
 # -----------------------------------------------------------------------------
 
 phase_nginx() {
-  step "[Phase 5/7] Nginx Reverse Proxy"
+  step "[Phase 5/8] Nginx Reverse Proxy"
   source "${INSTALLER_DIR}/nginx.sh"
   setup_nginx "${INSTALL_DOMAIN}"
   register_rollback "systemctl stop nginx 2>/dev/null; rm -f '${XRAY_VHOST_CONF}'"
@@ -176,7 +179,7 @@ phase_nginx() {
 # -----------------------------------------------------------------------------
 
 phase_ssh_stack() {
-  step "[Phase 6/7] SSH Stack"
+  step "[Phase 6/8] SSH Stack"
   source "${INSTALLER_DIR}/ssh_setup.sh"
   setup_ssh_stack "${WS_PORT}"
   register_rollback "svc_stop dropbear; svc_stop stunnel4; svc_stop ws-openssh; svc_stop ws-dropbear"
@@ -188,11 +191,23 @@ phase_ssh_stack() {
 # -----------------------------------------------------------------------------
 
 phase_openvpn() {
-  step "[Phase 7/7] OpenVPN"
+  step "[Phase 7/8] OpenVPN"
   source "${INSTALLER_DIR}/openvpn.sh"
   install_openvpn
   register_rollback "svc_stop openvpn@server-tcp; svc_stop openvpn@server-udp"
   success "Phase 7 complete."
+}
+
+# -----------------------------------------------------------------------------
+# Phase 8: Firewall Setup
+# -----------------------------------------------------------------------------
+
+phase_firewall() {
+  step "[Phase 8/8] Firewall Configuration"
+  setup_firewall
+  validate_firewall
+  register_rollback "ufw --force disable 2>/dev/null || true"
+  success "Phase 8 complete."
 }
 
 # -----------------------------------------------------------------------------
@@ -280,6 +295,7 @@ print_summary() {
   echo -e "  ${BOLD}Xray:       ${RESET}VMess/VLESS/Trojan WS+gRPC (via Nginx 443)"
   echo -e "  ${BOLD}Trojan-Go:  ${RESET}via Nginx 443 /trojango"
   echo -e "  ${BOLD}OpenVPN:    ${RESET}TCP 1194 / UDP 2200"
+  echo -e "  ${BOLD}Firewall:   ${RESET}${GREEN}Enabled (UFW)${RESET}"
   echo -e "  ${BOLD}Logs:       ${RESET}${LOG_DIR}/"
   echo -e "  ${BOLD}Duration:   ${RESET}${elapsed}s"
   echo ""
@@ -316,6 +332,7 @@ phase_xray
 phase_nginx
 phase_ssh_stack
 phase_openvpn
+phase_firewall
 phase_finalize
 
 log_audit "install_complete" "domain=${INSTALL_DOMAIN} version=${AUTOSCRIPT_VERSION}"

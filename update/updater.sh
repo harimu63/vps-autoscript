@@ -8,7 +8,7 @@ source "${LIB_DIR_LOCAL}/common.sh"
 source "${LIB_DIR_LOCAL}/logger.sh"
 source "${LIB_DIR_LOCAL}/service_manager.sh"
 
-readonly UPDATE_SOURCE="${UPDATE_SOURCE:-https://raw.githubusercontent.com/your-org/vps-autoscript/main}"
+readonly UPDATE_SOURCE="${UPDATE_SOURCE:-https://raw.githubusercontent.com/harimu63/vps-autoscript/main}"
 readonly UPDATE_TMP_DIR="/tmp/vps-autoscript-update"
 readonly VERSION_FILE="${SCRIPT_BASE_DIR}/version"
 

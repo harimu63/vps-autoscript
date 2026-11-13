@@ -28,10 +28,10 @@ This is a ground-up rewrite based on reverse engineering of the `gemilangvip/aut
 
 ```bash
 # Interactive install
-bash <(curl -fsSL https://your-domain/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/harimu63/vps-autoscript/main/install.sh)
 
 # Dry-run (checks only, no changes)
-bash <(curl -fsSL https://your-domain/install.sh) --dry-run
+bash <(curl -fsSL https://raw.githubusercontent.com/harimu63/vps-autoscript/main/install.sh) --dry-run
 ```
 
 ---
@@ -47,7 +47,7 @@ bash <(curl -fsSL https://your-domain/install.sh) --dry-run
 | Kernel | ≥ 4.9 (for BBR support) |
 | RAM | ≥ 512 MB (1 GB recommended) |
 | Disk | ≥ 5 GB free |
-| Domain | Optional (IP-only supported, but SSL cert won't work without domain) |
+| Domain | **REQUIRED** - Must be pointed to your VPS IP (SSL certificate needs domain) |
 
 ---
 
@@ -175,6 +175,43 @@ autoscript → [6] → [2]
 | Hardcoded UUID for all protocols | ✗ All protocols share one UUID | ✓ Per-user UUID per protocol |
 | curl \| bash without verify | ✗ Multiple remote scripts | ✓ SHA256 verification where possible |
 | eval-based obfuscation | ✗ jam.sh, slow.sh | ✓ No obfuscation |
+| No firewall setup | ✗ All ports open by default | ✓ UFW configured automatically |
+
+---
+
+## Firewall Configuration
+
+The script automatically configures UFW (Uncomplicated Firewall) during installation:
+
+**Allowed Ports:**
+- SSH: 22/tcp
+- HTTP: 80/tcp (for SSL cert issuance)
+- HTTPS: 443/tcp (Xray, Trojan-Go, all TLS traffic)
+- Dropbear: 444/tcp
+- Stunnel: 445/tcp
+- SSH WebSocket: 2095/tcp
+- OpenVPN TCP: 1194/tcp
+- OpenVPN UDP: 2200/udp
+- DNS: 53/udp
+- NTP: 123/udp
+
+**Manage Firewall:**
+```bash
+# Show firewall status
+ufw status verbose
+
+# Allow custom port
+ufw allow 8080/tcp
+
+# Remove port
+ufw delete allow 8080/tcp
+
+# Disable firewall (not recommended)
+ufw disable
+
+# Re-enable firewall
+ufw enable
+```
 
 ---
 

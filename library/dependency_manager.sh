@@ -49,7 +49,7 @@ apt_remove() {
 readonly -a CORE_DEPENDENCIES=(
   curl wget ca-certificates gnupg lsb-release
   openssl bzip2 zip unzip jq net-tools
-  iptables iproute2 cron socat
+  iptables iproute2 cron socat ufw
   fail2ban vnstat screen tmux htop
 )
 

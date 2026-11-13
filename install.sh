@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/your-org/vps-autoscript}"
+REPO_URL="${REPO_URL:-https://github.com/harimu63/vps-autoscript}"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/lib/vps-autoscript}"
 BRANCH="${BRANCH:-main}"
 

@@ -196,8 +196,15 @@ prompt_domain() {
   while true; do
     read -rp "$(echo -e "${CYAN}${prompt}: ${RESET}")" input
     input="${input,,}"  # lowercase
+    
+    # Remove http:// or https:// prefix if present
+    input="${input#http://}"
+    input="${input#https://}"
+    input="${input%/}"  # Remove trailing slash
+    
     if ! is_valid_domain "${input}"; then
       warn "Invalid domain format. Example: vpn.example.com"
+      warn "NOTE: IP address is NOT supported. You MUST use a domain for SSL certificate!"
       continue
     fi
     printf -v "${var_name}" '%s' "${input}"

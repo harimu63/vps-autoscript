@@ -49,7 +49,7 @@ readonly DOMAIN_FILE="${CONFIG_DIR}/domain"
 readonly VERSION_FILE="${SCRIPT_BASE_DIR}/version"
 
 # Current version
-readonly AUTOSCRIPT_VERSION="3.0.0"
+readonly AUTOSCRIPT_VERSION="3.0.1"
 
 # -----------------------------------------------------------------------------
 # Print Helpers

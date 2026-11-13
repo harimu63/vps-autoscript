@@ -112,7 +112,7 @@ generate_xray_config() {
 # -----------------------------------------------------------------------------
 
 install_xray_socket_shim() {
-  install_service_unit "runn" "[Unit]
+  install_service_unit "xray-socket-permissions" "[Unit]
 Description=Set Xray socket permissions on boot
 After=network.target
 
