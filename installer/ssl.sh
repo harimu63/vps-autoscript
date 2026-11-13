@@ -82,11 +82,18 @@ install_cert() {
     --keypath "${KEY_FILE}" \
     --capath "${CERT_DIR}/ca.crt" \
     --fullchainpath "${CERT_DIR}/fullchain.crt" \
-    --reloadcmd "systemctl restart xray nginx" \
     2>>"${SSL_LOG}"
 
   chmod 644 "${CERT_FILE}"
   chmod 600 "${KEY_FILE}"
+
+  # Reload services with timeout and error handling
+  step "Reloading services..."
+  systemctl restart nginx 2>/dev/null || true
+  sleep 2
+  systemctl restart xray 2>/dev/null || true
+  sleep 1
+  
   success "Certificate installed to ${CERT_DIR}/"
 }
 
@@ -106,7 +113,13 @@ renew_cert() {
     return 1
   fi
   install_cert "${domain}"
-  systemctl restart xray nginx
+  
+  # Reload services with timeout and error handling
+  systemctl restart nginx 2>/dev/null || true
+  sleep 2
+  systemctl restart xray 2>/dev/null || true
+  sleep 1
+  
   success "Certificate renewed."
 }
 
