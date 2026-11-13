@@ -13,8 +13,9 @@ readonly _LOGGER_SH=1
 # -----------------------------------------------------------------------------
 # Log configuration
 # -----------------------------------------------------------------------------
-LOG_DIR="${LOG_DIR:-/var/log/vps-autoscript}"
-LOG_FILE="${LOG_DIR}/autoscript.log"
+# LOG_DIR is readonly in common.sh, so use a subshell-safe local var
+LOG_DIR_LOCAL="${LOG_DIR:-/var/log/vps-autoscript}"
+LOG_FILE="${LOG_DIR_LOCAL}/autoscript.log"
 LOG_MAX_SIZE_MB="${LOG_MAX_SIZE_MB:-10}"
 LOG_ROTATE_COUNT="${LOG_ROTATE_COUNT:-5}"
 LOG_LEVEL="${LOG_LEVEL:-INFO}"  # DEBUG, INFO, WARN, ERROR
@@ -22,7 +23,7 @@ LOG_LEVEL="${LOG_LEVEL:-INFO}"  # DEBUG, INFO, WARN, ERROR
 declare -A _LOG_LEVELS=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3)
 
 _init_logger() {
-  [[ -d "${LOG_DIR}" ]] || mkdir -p "${LOG_DIR}"
+  [[ -d "${LOG_DIR_LOCAL}" ]] || mkdir -p "${LOG_DIR_LOCAL}"
   [[ -f "${LOG_FILE}" ]] || touch "${LOG_FILE}"
   chmod 640 "${LOG_FILE}"
 }
